@@ -15,6 +15,7 @@ import { ZExportHostsForWeightsInputSchema } from "./exportHostsForWeights.schem
 import { ZGetHostsForAssignmentInputSchema } from "./getHostsForAssignment.schema";
 import { ZGetHostsForAvailabilityInputSchema } from "./getHostsForAvailability.schema";
 import { ZGetHostsWithLocationOptionsInputSchema } from "./getHostsWithLocationOptions.schema";
+import { ZMarkAsVipInputSchema } from "./markAsVip.schema";
 import { ZMassApplyHostLocationInputSchema } from "./massApplyHostLocation.schema";
 import { get } from "./procedures/get";
 import { ZSearchTeamMembersInputSchema } from "./searchTeamMembers.schema";
@@ -247,4 +248,13 @@ export const eventTypesRouter = router({
         input,
       });
     }),
+
+  markAsVip: authedProcedure.input(ZMarkAsVipInputSchema).mutation(async ({ ctx, input }) => {
+    const { markAsVipHandler } = await import("./markAsVip.handler");
+
+    return markAsVipHandler({
+      ctx,
+      input,
+    });
+  }),
 });

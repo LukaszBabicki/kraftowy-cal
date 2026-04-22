@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "EventType" ADD COLUMN "isVip" BOOLEAN NOT NULL DEFAULT false;
