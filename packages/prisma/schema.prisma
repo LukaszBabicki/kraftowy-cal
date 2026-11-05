@@ -498,6 +498,7 @@ model User {
   wrongAssignmentReports         WrongAssignmentReport[]       @relation("WrongAssignmentReportedBy")
   reviewedWrongAssignmentReports WrongAssignmentReport[]       @relation("WrongAssignmentReviewedBy")
   BookingInternalNote            BookingInternalNote[]
+  bookingPrivateNotes            BookingPrivateNote[]
   creationSource                 CreationSource?
   createdOrganizationOnboardings OrganizationOnboarding[]      @relation("CreatedOrganizationOnboardings")
   filterSegments                 FilterSegment[]
@@ -907,6 +908,7 @@ model Booking {
   rescheduledBy          String?
   assignmentReason       AssignmentReason[]
   internalNote           BookingInternalNote[]
+  privateNotes           BookingPrivateNote[]
   creationSource         CreationSource?
   tracking               Tracking?
   expenseLogs            CreditExpenseLog[]
@@ -2350,6 +2352,25 @@ model BookingInternalNote {
 
   @@unique([bookingId, notePresetId])
   @@index([bookingId])
+}
+
+/// Per-user private note attached to a booking. Never exposed to other attendees/hosts.
+model BookingPrivateNote {
+  id Int @id @default(autoincrement())
+
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId Int
+
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+
+  text String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([bookingId, userId])
+  @@index([userId])
 }
 
 enum RoleType {

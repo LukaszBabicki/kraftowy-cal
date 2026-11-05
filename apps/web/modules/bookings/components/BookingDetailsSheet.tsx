@@ -48,6 +48,7 @@ import {
   checkSheetActive,
   createBookingSheetKeydownHandler,
 } from "../lib/bookingSheetKeyboardHandler";
+import { BookingPrivateNoteSection } from "./BookingPrivateNoteSection";
 import { JoinMeetingButton } from "./JoinMeetingButton";
 
 type BookingMetaData = z.infer<typeof bookingMetadataSchema>;
@@ -424,6 +425,8 @@ function BookingDetailsSheetInner({
                 />
 
                 <TrackingSection tracking={bookingDetails?.tracking} />
+
+                <BookingPrivateNoteSection key={booking.uid} bookingUid={booking.uid} />
               </>
             )}
 

@@ -13,6 +13,11 @@ import { ZGetBookingDetailsInputSchema } from "./getBookingDetails.schema";
 import { ZGetBookingHistoryInputSchema } from "./getBookingHistory.schema";
 import { ZGetWrongAssignmentReportsInputSchema } from "./getWrongAssignmentReports.schema";
 import { ZHasWrongAssignmentReportInputSchema } from "./hasWrongAssignmentReport.schema";
+import {
+  ZDeletePrivateNoteInputSchema,
+  ZGetPrivateNoteInputSchema,
+  ZUpsertPrivateNoteInputSchema,
+} from "./privateNote.schema";
 import { ZReportBookingInputSchema } from "./reportBooking.schema";
 import { ZReportWrongAssignmentInputSchema } from "./reportWrongAssignment.schema";
 import { ZRequestRescheduleInputSchema } from "./requestReschedule.schema";
@@ -86,6 +91,21 @@ export const bookingsRouter = router({
       ctx,
       input,
     });
+  }),
+
+  getPrivateNote: authedProcedure.input(ZGetPrivateNoteInputSchema).query(async ({ input, ctx }) => {
+    const { getPrivateNoteHandler } = await import("./privateNote.handler");
+    return getPrivateNoteHandler({ ctx, input });
+  }),
+
+  upsertPrivateNote: authedProcedure.input(ZUpsertPrivateNoteInputSchema).mutation(async ({ input, ctx }) => {
+    const { upsertPrivateNoteHandler } = await import("./privateNote.handler");
+    return upsertPrivateNoteHandler({ ctx, input });
+  }),
+
+  deletePrivateNote: authedProcedure.input(ZDeletePrivateNoteInputSchema).mutation(async ({ input, ctx }) => {
+    const { deletePrivateNoteHandler } = await import("./privateNote.handler");
+    return deletePrivateNoteHandler({ ctx, input });
   }),
 
   find: publicProcedure.input(ZFindInputSchema).query(async ({ input, ctx }) => {

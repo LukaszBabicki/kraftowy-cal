@@ -1,0 +1,1 @@
+export const BOOKING_PRIVATE_NOTE_MAX_LENGTH = 5000;
