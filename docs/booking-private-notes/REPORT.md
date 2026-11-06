@@ -2,6 +2,62 @@
 
 Gałąź: `feature/06-02-autonomia` (zmiany lokalne, bez push). Specyfikacja i kryteria odbioru: [SPEC.md](./SPEC.md).
 
+Spis: 0 brief · 1 ustalenia · 2 zakres · 3 kryteria odbioru · 4 testy · 5 dowody działania · 6 review specyfikacji · 7 review kodu i poprawki · 8 elementy niesprawdzone · 9 ręczny odbiór użytkownika.
+
+## 0. Oryginalny brief
+Treść pierwszej wiadomości zadania odtworzona dosłownie z historii sesji (bez zmian):
+
+`````markdown
+# Z1-06.02 – Autonomiczna implementacja modułu notatek do rezerwacji
+
+## Cel
+Zbuduj kompletny moduł prywatnych notatek do rezerwacji w aplikacji kraftowy-cal.
+
+## Problem użytkownika
+Użytkownik chce przechowywać własne informacje dotyczące spotkań, bez udostępniania ich zaproszonym uczestnikom.
+
+## Scenariusz
+Użytkownik otwiera szczegóły swojej rezerwacji, dodaje notatkę i zapisuje ją. Po ponownym otwarciu rezerwacji widzi zapisaną treść. Może ją edytować lub usunąć.
+
+## Kryteria odbioru
+- Notatki są trwale zapisywane i odczytywane z bazy danych.
+- Możliwe jest dodawanie, edycja i usuwanie notatek.
+- Notatki dostępne są wyłącznie dla uprawnionego właściciela.
+- Obsłużone są błędne dane, brak uprawnień, brak rezerwacji i błędy zapisu.
+- Istniejące rezerwacje, powiadomienia i mechanizmy autoryzacji działają bez regresji.
+- Interfejs działa na desktopie i urządzeniach mobilnych.
+
+Najpierw sprawdź, czy funkcjonalność nie istnieje już w repozytorium. Jeśli jest dostępna w całości, zatrzymaj się i przedstaw ustalenia zamiast tworzyć duplikat.
+
+## Granice
+- Pracuj wyłącznie na gałęzi feature/06-02-autonomia w bieżącym worktree.
+- Nie modyfikuj produkcji ani produkcyjnych danych.
+- Zmiany schematu i migracje wykonuj wyłącznie w izolowanym środowisku testowym.
+- Nie wykonuj deployu ani push do zdalnego repozytorium.
+- Nie obchodź zabezpieczeń, hooków ani polityk Git.
+- Nie zmieniaj istniejącego hooka pre-push.
+- Nie ingeruj w inne worktree i zadania.
+
+## Autonomiczny proces
+1. Poznaj architekturę repozytorium i obowiązujące instrukcje.
+2. Przygotuj specyfikację z kryteriami odbioru.
+3. Zleć niezależnemu agentowi review specyfikacji i popraw potwierdzone braki.
+4. Samodzielnie opracuj plan implementacji.
+5. Zaimplementuj pełną funkcjonalność.
+6. Dodaj testy jednostkowe, integracyjne i właściwe regresyjne.
+7. Uruchom aplikację na danych syntetycznych i sprawdź scenariusz użytkownika od początku do końca.
+8. Zbierz zrzuty ekranu i wyniki testów.
+9. Zleć niezależnemu agentowi review gotowych zmian.
+10. Popraw potwierdzone błędy i ponów odpowiednie testy.
+
+Nie zatrzymuj się po każdym etapie po rutynowe potwierdzenie. Zatrzymaj się przy decyzji produktowej, braku dostępu, ryzyku nieodwracalnych działań albo po trzech nieskutecznych próbach rozwiązania tego samego problemu. Nie omijaj zabezpieczeń.
+
+## Wynik końcowy
+Dostarcz kompletną zmianę na osobnej gałęzi oraz raport Markdown zawierający specyfikację, kryteria odbioru, wyniki testów, dowody działania, wyniki obu review, wykonane poprawki i listę elementów niesprawdzonych.
+
+Nie uznawaj zadania za zakończone bez weryfikacji działającej funkcjonalności.
+`````
+
 ## 1. Ustalenia wstępne
 Funkcjonalność **nie istniała**. `BookingInternalNote` to presety powodu anulowania (host), `Booking.description` to uwagi bookera widoczne dla wszystkich.
 Wykryte ryzyko bazowe: `PermissionCheckService` w `BookingAccessService` to stub zwracający zawsze `true`, więc notatki mają własną, ścisłą kontrolę uczestnictwa.
@@ -13,7 +69,9 @@ Wykryte ryzyko bazowe: `PermissionCheckService` w `BookingAccessService` to stub
 - UI: `BookingPrivateNoteSection` w `BookingDetailsSheet` (desktop + mobile), i18n en/pl.
 - Testy: 12 + 6 + 3 + 10 (jednostkowe/komponentowe), 5 integracyjnych (prawdziwa baza).
 
-## 3. Kryteria odbioru – status
+## 3. Specyfikacja i kryteria odbioru – status
+Pełna specyfikacja (model domenowy, reguły autoryzacji, API, UI, kryteria K1–K9, decyzje po review §6a, zakres wyłączony): [SPEC.md](./SPEC.md). Kryteria K1–K9 pochodzą z §6 SPEC.md; poniżej status stanu automatycznego (ręczny odbiór użytkownika: sekcja 9).
+
 | Kryterium | Status | Dowód |
 |---|---|---|
 | K1 trwały zapis/odczyt | ✅ | e2e: po `reload` notatka odczytana z bazy; test integracyjny |
@@ -27,14 +85,19 @@ Wykryte ryzyko bazowe: `PermissionCheckService` w `BookingAccessService` to stub
 | K9 migracja tylko na izolowanej bazie | ✅ | kontener `kcal-0602-testdb`, port 5462, `migrate diff`: brak różnic |
 
 ## 4. Wyniki testów
-- Nowe jednostkowe/komponentowe: 29+ przechodzi (service 13, schema 3, handler 6, komponent 10).
+- Nowe jednostkowe/komponentowe: 29+ przechodzi (service 13, schema 3, handler 6, komponent 10). Uwaga: sekcja 2 podaje 12 + 6 + 3 + 10 – rozbieżność w liczbie testów serwisu/handlera zachowana z oryginału, nie została ponownie zweryfikowana w tej aktualizacji.
 - Integracyjne (`VITEST_MODE=integration`): `BookingPrivateNoteService.integration-test.ts` 5/5; istniejący `get.handler.integration-test.ts` 7/7.
 - Regresja `apps/web`, `packages/features/bookings`, `packages/trpc/.../bookings`: 1192 przeszło, 15 pominiętych (istniejące `skip`), **2 niepowodzenia** w `apps/web/modules/schedules/components/date-override-list.test.tsx` – test zakodowany na konkretną datę („Thursday, November 5”), niezwiązany ze zmianą (nie dotykam tego modułu).
 - Biome: nowe pliki bez błędów; `BookingDetailsSheet.tsx` ma istniejące uwagi formatowania sprzed zmiany (nie reformatowałem pliku).
 
 ## 5. Dowody działania (dane syntetyczne, seed Cal.com, użytkownik `pro`)
 Scenariusz `e2e-scenario.mjs` (Playwright): logowanie → lista rezerwacji → szczegóły → dodanie → zapis → reload → ponowne otwarcie (treść obecna) → edycja → usunięcie z potwierdzeniem → walidacja 5001 znaków → zapis końcowy. Przeszedł na desktopie (1440×900) i mobile (390×844).
-Zrzuty: `screenshots/desktop-00…08-*.png`, `screenshots/mobile-00…08-*.png`. Treść `<b>…</b>` wyświetlana jako zwykły tekst.
+Zrzuty (istniejące, w `screenshots/`):
+- desktop: [00-list](./screenshots/desktop-00-list.png), [01-empty](./screenshots/desktop-01-empty.png), [02-editing](./screenshots/desktop-02-editing.png), [03-saved](./screenshots/desktop-03-saved.png), [04-reopened](./screenshots/desktop-04-reopened.png), [05-edited](./screenshots/desktop-05-edited.png), [06-confirm-delete](./screenshots/desktop-06-confirm-delete.png), [07-deleted](./screenshots/desktop-07-deleted.png), [08-too-long](./screenshots/desktop-08-too-long.png)
+- mobile: [00-list](./screenshots/mobile-00-list.png), [01-empty](./screenshots/mobile-01-empty.png), [02-editing](./screenshots/mobile-02-editing.png), [03-saved](./screenshots/mobile-03-saved.png), [04-reopened](./screenshots/mobile-04-reopened.png), [05-edited](./screenshots/mobile-05-edited.png), [06-confirm-delete](./screenshots/mobile-06-confirm-delete.png), [07-deleted](./screenshots/mobile-07-deleted.png), [08-too-long](./screenshots/mobile-08-too-long.png)
+
+Uwaga: skrypt `e2e-scenario.mjs` nie robi `reload` po kroku usunięcia (zrzut 07 pokazuje stan UI po usunięciu); trwałość usunięcia po odświeżeniu nie jest więc udowodniona tym scenariuszem (zob. sekcja 9). Usunięcie w bazie jest pokryte jedynie testami automatycznymi (serwis/integracyjne) i wywołaniem HTTP `delete` → `{"deleted":true}`.
+Zrzuty były wykonane przed ręcznym odbiorem i są dowodem automatycznego scenariusza, nie ręcznego odbioru. Treść `<b>…</b>` wyświetlana jako zwykły tekst.
 Autoryzacja przez realne HTTP (`/api/trpc`): zob. sekcja 6, punkt 2.
 
 ```
@@ -87,3 +150,16 @@ Niepotwierdzone/odrzucone: oracle 403 vs 404 (uid nieodgadywalne – ryzyko zaak
 - Zarządzanie fokusem a11y, Escape w potwierdzeniu usunięcia, nawigacja klawiaturowa – patrz sekcja 7.
 - Test `date-override-list` (2 niepowodzenia) – istniejący, zależny od daty.
 - Nie wykonywano deployu ani push; hook `.husky/pre-push` nie był zmieniany (pozostaje nieśledzony, nie dodany do commita).
+
+## 9. Wyniki ręcznego odbioru użytkownika
+Wyniki podane przez użytkownika po ręcznym sprawdzeniu funkcjonalności (nie są wynikiem testów automatycznych):
+
+| Scenariusz ręczny | Wynik |
+|---|---|
+| Dodanie i zapis notatki | PASS |
+| Odczyt po odświeżeniu | PASS |
+| Edycja notatki | PASS |
+| Usunięcie notatki w interfejsie | PASS |
+| Trwałość usunięcia po odświeżeniu | **NIEPOTWIERDZONA ręcznie** |
+
+Zastrzeżenie: ostatni punkt nie został sprawdzony ręcznie, więc nie jest zgłaszany jako zaliczony. Nie ma go też w automatycznym scenariuszu e2e (brak `reload` po usunięciu, zob. sekcja 5); w bazie usunięcie weryfikują wyłącznie testy serwisu/integracyjne i wywołanie HTTP `delete`. Do potwierdzenia: usunąć notatkę, odświeżyć stronę, ponownie otworzyć rezerwację i sprawdzić stan pusty.
