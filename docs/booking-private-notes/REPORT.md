@@ -67,7 +67,7 @@ Wykryte ryzyko bazowe: `PermissionCheckService` w `BookingAccessService` to stub
 - `BookingPrivateNoteRepository` / `BookingPrivateNoteService` (`packages/features/bookings`).
 - tRPC `viewer.bookings.getPrivateNote | upsertPrivateNote | deletePrivateNote` (+ schema, handler z jawną konwersją błędów).
 - UI: `BookingPrivateNoteSection` w `BookingDetailsSheet` (desktop + mobile), i18n en/pl.
-- Testy: 12 + 6 + 3 + 10 (jednostkowe/komponentowe), 5 integracyjnych (prawdziwa baza).
+- Testy: 32 jednostkowe/komponentowe (serwis 13, handler 6, schemat 3, komponent 10) oraz 5 integracyjnych (prawdziwa baza) – liczby zweryfikowane, zob. sekcja 4.
 
 ## 3. Specyfikacja i kryteria odbioru – status
 Pełna specyfikacja (model domenowy, reguły autoryzacji, API, UI, kryteria K1–K9, decyzje po review §6a, zakres wyłączony): [SPEC.md](./SPEC.md). Kryteria K1–K9 pochodzą z §6 SPEC.md; poniżej status stanu automatycznego (ręczny odbiór użytkownika: sekcja 9).
@@ -85,9 +85,13 @@ Pełna specyfikacja (model domenowy, reguły autoryzacji, API, UI, kryteria K1�
 | K9 migracja tylko na izolowanej bazie | ✅ | kontener `kcal-0602-testdb`, port 5462, `migrate diff`: brak różnic |
 
 ## 4. Wyniki testów
-- Nowe jednostkowe/komponentowe: 29+ przechodzi (service 13, schema 3, handler 6, komponent 10). Uwaga: sekcja 2 podaje 12 + 6 + 3 + 10 – rozbieżność w liczbie testów serwisu/handlera zachowana z oryginału, nie została ponownie zweryfikowana w tej aktualizacji.
-- Integracyjne (`VITEST_MODE=integration`): `BookingPrivateNoteService.integration-test.ts` 5/5; istniejący `get.handler.integration-test.ts` 7/7.
-- Regresja `apps/web`, `packages/features/bookings`, `packages/trpc/.../bookings`: 1192 przeszło, 15 pominiętych (istniejące `skip`), **2 niepowodzenia** w `apps/web/modules/schedules/components/date-override-list.test.tsx` – test zakodowany na konkretną datę („Thursday, November 5”), niezwiązany ze zmianą (nie dotykam tego modułu).
+- Zweryfikowane ponownym uruchomieniem (2026-11-06, `yarn vitest run` na 4 plikach nowego modułu): **32/32 przechodzi**:
+  - jednostkowe serwisu (`BookingPrivateNoteService.test.ts`): **13** (11 wywołań `it` + parametryzacja `it.each`);
+  - handler (`privateNote.handler.test.ts`): **6**; schemat (`privateNote.schema.test.ts`): **3**;
+  - komponentowe (`BookingPrivateNoteSection.test.tsx`): **10**.
+  - Wcześniejsza rozbieżność (12+6+3+10 w sekcji 2) nie odpowiadała faktycznej liczbie testów (przyczyny nie ustalano); obowiązują liczby powyżej.
+- Integracyjne (`VITEST_MODE=integration`, izolowany kontener `kcal-0602-testdb`, ponownie uruchomione 2026-11-06): `BookingPrivateNoteService.integration-test.ts` **5/5**. Istniejący `get.handler.integration-test.ts` 7/7 – wynik z pierwotnego raportu, w tej weryfikacji nie powtarzany.
+- Regresja `apps/web`, `packages/features/bookings`, `packages/trpc/.../bookings`: wynik z logu sesji z 2026-11-05 (nie powtarzany w tej weryfikacji): **1192 przeszło, 15 pominiętych, 3 `todo`**, 1212 łącznie, **2 niepowodzenia** w `apps/web/modules/schedules/components/date-override-list.test.tsx` – test zakodowany na konkretną datę („Thursday, November 5”), niezwiązany ze zmianą (nie dotykam tego modułu).
 - Biome: nowe pliki bez błędów; `BookingDetailsSheet.tsx` ma istniejące uwagi formatowania sprzed zmiany (nie reformatowałem pliku).
 
 ## 5. Dowody działania (dane syntetyczne, seed Cal.com, użytkownik `pro`)
